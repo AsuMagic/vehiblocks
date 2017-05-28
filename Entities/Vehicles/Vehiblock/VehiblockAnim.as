@@ -1,0 +1,4 @@
+void onInit(CSprite@ sprite)
+{
+	
+}

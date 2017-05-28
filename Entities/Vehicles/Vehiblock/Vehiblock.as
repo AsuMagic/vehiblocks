@@ -20,7 +20,7 @@ void onTick(CBlob@ blob)
 	if (localBlob !is null)
 	{
 		BlockPosition offset = positionFromWorldPos(blob, localBlob.getAimPos());
-		//print("Aim relative to core : " + offset.x + "; " + offset.y);
+		print("Aim relative to core : " + offset.x + "; " + offset.y);
 	}
 }
 

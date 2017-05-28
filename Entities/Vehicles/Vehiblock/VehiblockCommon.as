@@ -71,6 +71,12 @@ BlockPosition positionFromWorldPos(CBlob@ blob, const Vec2f blockPosition)
 	const Vec2f blobPosition = blob.getPosition();
 	const float tileSize = getMap().tilesize;
 	Vec2f flat((blockPosition.x - blobPosition.x) / tileSize, (blockPosition.y - blobPosition.y) / tileSize);
+	flat.RotateBy(-blob.getAngleDegrees());
+	
+	if (blob.isFacingLeft())
+	{
+		flat.x = -flat.x;
+	}
 				
-	return BlockPosition(flat.RotateBy(blob.getAngleDegrees()));
+	return BlockPosition(flat);
 }

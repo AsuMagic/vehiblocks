@@ -5,13 +5,19 @@ const int vehiblockSize = 32; // In tiles (width & height)
 
 class BlockPosition
 {
-	BlockPosition(int offx, int offy)
+	BlockPosition(const int offset)
+	{
+		x = offset % vehiblockSize;
+		y = offset / vehiblockSize;
+	}
+	
+	BlockPosition(const int offx, const int offy)
 	{
 		x = offx;
 		y = offy;
 	}
 	
-	BlockPosition(Vec2f vec)
+	BlockPosition(const Vec2f vec)
 	{
 		x = vec.x;
 		y = vec.y;

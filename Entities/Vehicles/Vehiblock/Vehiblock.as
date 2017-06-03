@@ -1,10 +1,12 @@
 #include "VehiblockCommon.as"
 
-int layerID = 0;
-bool removedBlockLastTick = false;
+int layerID = 0, shapeID = 0;
+bool insertedBlockLastTick = false;
 
 void onInit(CBlob@ blob)
 {
+	blob.Tag("heavy weight");
+
 	placedBlocks.clear();
 	placedBlocks.resize(vehiblockSize * vehiblockSize);
 
@@ -15,6 +17,7 @@ void onInit(CBlob@ blob)
 	toInsert.push_back(PlannedBlock(CMap::tile_ground, BlockPosition(0, -1).absolute()));
 	toInsert.push_back(PlannedBlock(CMap::tile_castle, BlockPosition(-1, 1).absolute()));
 	toInsert.push_back(PlannedBlock(CMap::tile_castle, BlockPosition(-1, -2).absolute()));
+	toRemove.push_back(@placedBlocks[BlockPosition(-1, -2).absolute()]);
 
 	syncBlocksToBlob(blob);
 	syncUpdatesToBlob(blob);
@@ -33,7 +36,7 @@ void onTick(CBlob@ blob)
 
 	syncFromBlob(blob);
 
-	if (!removedBlockLastTick && !toRemove.empty())
+	if (insertedBlockLastTick && !toRemove.empty())
 	{
 		for (int i = 0; i < toRemove.size(); i++)
 		{
@@ -42,7 +45,7 @@ void onTick(CBlob@ blob)
 		}
 
 		toRemove.clear();
-		removedBlockLastTick = true;
+		insertedBlockLastTick = false;
 	}
 	else
 	{
@@ -52,7 +55,7 @@ void onTick(CBlob@ blob)
 			unsafe_setBlock(blob, BlockPosition(toInsert[i].offset), toInsert[i].type);
 		}
 		toInsert.clear();
-		removedBlockLastTick = false;
+		insertedBlockLastTick = true;
 	}
 
 	syncToBlob(blob);
@@ -70,12 +73,24 @@ f32 onHit(CBlob@ blob, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitt
 	return 0.f;
 }
 
+// The "unsafe" methods exists because of the KAG engine bug - https://forum.thd.vg/threads/obscure-cshape-removeshape-method.26842/#post-398411
+// This bug makes using both RemoveShape and AddShape within a tick unreliable.
+// As a workaround vehiblock exposes a toInsert and a toRemove list. When/if this bug gets fixed it can be done directly again.
 void unsafe_removeBlock(CBlob@ blob, Block@ block)
 {
 	if (block.isPresent())
 	{
-		/*print("Erasing shape ID#" + offset); // TODO
-		blob.getShape().RemoveShape(3);
+		print("Erasing shape ID#" + block.shapeID);
+		blob.getShape().RemoveShape(block.shapeID);
+
+		// TODO this could be done faster by sorting the array first
+		for (int i = 0; i < toRemove.size(); i++)
+		{
+			if (toRemove[i].shapeID > block.shapeID)
+			{
+				--toRemove[i].shapeID;
+			}
+		}
 
 		// Align other shapeIDs to the current one
 		for (int i = 0; i < placedBlocks.size(); i++)
@@ -84,12 +99,18 @@ void unsafe_removeBlock(CBlob@ blob, Block@ block)
 			{
 				--placedBlocks[i].shapeID;
 			}
-		}*/
+		}
 
 		blob.getSprite().RemoveSpriteLayer("t" + block.layerID);
+
+		--shapeID;
+	}
+	else
+	{
+		warn("Tried to erase non-present block");
 	}
 
-	block.type = 0; // Set to air tile*/
+	block.type = 0; // Set to air tile
 }
 
 void unsafe_setBlock(CBlob@ blob, const BlockPosition position, const u16 tile)
@@ -118,5 +139,5 @@ void unsafe_setBlock(CBlob@ blob, const BlockPosition position, const u16 tile)
 	spriteLayer.SetOffset(position.toVec());
 	spriteLayer.SetFrameIndex(tile);
 
-	placedBlocks[position.absolute()] = Block(tile, /*shapeID*/0, layerID);
+	placedBlocks[position.absolute()] = Block(tile, ++shapeID, layerID);
 }

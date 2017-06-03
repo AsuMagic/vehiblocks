@@ -65,3 +65,15 @@ class PlannedBlock
 	u16 type = 0;
 	int offset;
 };
+
+class RemovedBlock
+{
+	RemovedBlock(Block@ _block, const int _offset)
+	{
+		@block = @_block;
+		offset = _offset;
+	}
+
+	Block@ block;
+	int offset;
+};

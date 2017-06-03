@@ -36,11 +36,7 @@ void onTick(CBlob@ blob)
 		}
 		else if (getControls().isKeyJustPressed(KEY_KEY_U))
 		{
-			Block@ userRemoved = @vData.placedBlocks[positionFromWorldPos(blob, localBlob.getAimPos()).absolute()];
-			if (userRemoved !is null)
-			{
-				vData.remove(positionFromWorldPos(blob, localBlob.getAimPos()).absolute());
-			}
+			vData.remove(positionFromWorldPos(blob, localBlob.getAimPos()).absolute());
 		}
 	}
 	// END OF DEBUG
@@ -71,7 +67,7 @@ void onTick(CBlob@ blob)
 // Allow to carry the vehiblock only when it is light enough
 bool canBePickedUp(CBlob@ blob, CBlob@ byBlob)
 {
-	return blob.getMass() <= 7000;
+	return blob.getMass() <= 10000;
 }
 
 f32 onHit(CBlob@ blob, Vec2f worldPoint, Vec2f velocity, f32 damage, CBlob@ hitterBlob, u8 customData)
